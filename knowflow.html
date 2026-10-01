@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>KnowFlow – Prototype</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);--bg:#eef3f8;--card:#fff;--ink:#14213d;--mut:#55627f;--acc:#0b7f70;--soft:#e4f4f1;--line:#d3dcea;--bad:#a4410f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1525;--card:#17213a;--ink:#e8edf7;--mut:#9aa8c4;--acc:#3fd0bb;--soft:#123a3b;--line:#2a3857;--bad:#f0a56b}}
+:root[data-theme="dark"]{--bg:#0e1525;--card:#17213a;--ink:#e8edf7;--mut:#9aa8c4;--acc:#3fd0bb;--soft:#123a3b;--line:#2a3857;--bad:#f0a56b}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*:before,*:after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Source Sans 3",system-ui,sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.15;margin:0}
+h1{font-size:2.3rem;font-weight:800;display:flex;align-items:center;gap:10px}
+.sub{color:var(--mut);margin:8px 0 22px;max-width:56ch}
+nav{display:flex;gap:6px;margin-bottom:18px;border-bottom:2px solid var(--line)}
+nav button{flex:1;border:0;background:none;color:var(--mut);font:600 1rem "Source Sans 3",sans-serif;padding:12px 6px;cursor:pointer;border-bottom:4px solid transparent;margin-bottom:-2px}
+nav button[aria-selected=true]{color:var(--acc);border-color:var(--acc)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.panel[hidden]{display:none}
+label{display:block;font-weight:600;margin:14px 0 6px}
+input[type=text],textarea,select{width:100%;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit}
+textarea{min-height:110px;resize:vertical}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:10px;padding:12px 20px;font:600 1rem "Source Sans 3",sans-serif;cursor:pointer;margin-top:16px}
+:root[data-theme="dark"] .btn,@media (prefers-color-scheme:dark){.btn{color:#06201c}}
+.btn.alt{background:var(--soft);color:var(--acc);border:1.5px solid var(--acc)}
+.btn:disabled{opacity:.6;cursor:wait}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1;min-width:160px}
+.mode{display:flex;gap:18px;flex-wrap:wrap;margin:6px 0}.mode label{display:flex;gap:8px;align-items:center;margin:0;font-weight:400}
+.guide{background:var(--soft);border-radius:12px;padding:6px 16px 16px;margin-top:12px}
+.note{color:var(--mut);font-size:.92rem;margin-top:10px}
+.answer{background:var(--soft);border-left:5px solid var(--acc);padding:14px 16px;border-radius:0 12px 12px 0;margin:18px 0;white-space:pre-wrap}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+.card h3{font-size:1.25rem}
+.tag{display:inline-block;background:var(--soft);color:var(--acc);font-weight:600;font-size:.85rem;border-radius:99px;padding:2px 12px;margin-bottom:8px}
+.ctx{color:var(--mut);margin:6px 0 4px}
+.card h4{margin:14px 0 4px;font-size:.98rem}
+.card ul,.card ol{margin:0;padding-left:22px}
+.err h4{color:var(--bad)}
+.fb{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.fb .row{align-items:center}.fb .btn{margin:0;flex:0 0 auto;min-width:0}
+.empty{color:var(--mut);padding:24px 0}
+@media (prefers-reduced-motion:no-preference){.card{animation:in .25s ease-out}@keyframes in{from{opacity:.4}to{opacity:1}}}
+.lang{margin-left:auto;display:flex;gap:6px}.lang button{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:5px 11px;font:600 .9rem "Source Sans 3",sans-serif;cursor:pointer}.lang button[aria-pressed=true]{background:var(--acc);border-color:var(--acc);color:#fff}
+</style></head>
+<body><main>
+<h1><svg width="38" height="38" viewBox="0 0 40 40" fill="none" stroke="var(--acc)" stroke-width="4" stroke-linecap="round" aria-hidden="true"><path d="M8 22a12 12 0 0 1 22-7"/><path d="M31 6v9h-9"/><path d="M32 18a12 12 0 0 1-22 7"/><path d="M9 34v-9h9"/></svg><span>KnowFlow</span><span class="lang" role="group" aria-label="Langue / Language"><button id="lfr" aria-pressed="true">FR</button><button id="len" aria-pressed="false">EN</button></span></h1>
+<p class="sub" id="sub"></p>
+<nav role="tablist"><button role="tab" id="t-search" aria-selected="true"></button><button role="tab" id="t-share" aria-selected="false"></button><button role="tab" id="t-fiches" aria-selected="false"></button></nav>
+<section class="panel" id="p-search">
+<label for="q" id="ql"></label><input type="text" id="q">
+<label for="lvl" id="ll"></label><select id="lvl"></select>
+<button class="btn" id="go"></button><div id="sres" aria-live="polite"></div></section>
+<section class="panel" id="p-share" hidden>
+<h2 id="sh"></h2><p class="note" id="sn"></p>
+<div class="mode"><label><input type="radio" name="m" value="new" checked><span id="mn"></span></label><label><input type="radio" name="m" value="add"><span id="ma"></span></label></div>
+<div id="tbox" hidden><label for="target" id="tl"></label><select id="target"></select></div>
+<label for="free" id="fl"></label><textarea id="free"></textarea>
+<button class="btn alt" id="guide-btn" type="button"></button>
+<div class="guide" id="guide" hidden>
+<label for="g1" id="gl1"></label><input type="text" id="g1"><label for="g2" id="gl2"></label><input type="text" id="g2"><label for="g3" id="gl3"></label><input type="text" id="g3"><label for="g4" id="gl4"></label><input type="text" id="g4"><label for="g5" id="gl5"></label><input type="text" id="g5"></div>
+<div><button class="btn" id="make"></button></div><div id="mres" class="note" aria-live="polite"></div></section>
+<section class="panel" id="p-fiches" hidden><div id="all"></div></section>
+<p class="note" id="mode-note"></p></main>
+<script>
+const $=s=>document.querySelector(s);
+const L={fr:{sub:"L'expérience des gens devient une connaissance que les autres peuvent retrouver, appliquer et enrichir. Prototype pour tous ceux qui ont un savoir-faire à transmettre : cuisinier, cordonnier, tailleur, étudiant…",ts:"Chercher",th:"Partager",tf:"Toutes les fiches",ql:"Quelle est ta question ?",qp:"Ex. : Comment faire durer mes chaussures ?",ll:"Ta situation",lv:["Débutant","Étudiant de 1re année","Étudiant de 2e année","Étudiant de 3e année","Étudiant de master"],go:"Trouver une expérience",sh:"Partage ce que tu sais",sn:"Un savoir-faire de ton métier, une astuce, un lien, une erreur à éviter : tout ce qui peut aider quelqu'un compte.",mn:" Ajouter une nouvelle connaissance",ma:" Compléter une fiche existante",tl:"Quelle fiche veux-tu compléter ?",fl:"Ce que tu veux partager",fp:"Écris comme tu parlerais à un camarade. Pas besoin de bien rédiger.",gb:"Je ne sais pas par où commencer",gh:"Masquer les questions guidées",g:["Dans quelle situation étais-tu ?","Qu'est-ce que tu as fait ?","Qu'est-ce qui a bien marché ?","Quelle erreur faut-il éviter ?","Quel lien ou quelle ressource peut aider ?"],mk:"Transformer en fiche",st:"Étapes",tp:"Conseils",er:"Erreurs à éviter",rs:"Ressources",rt:"Retours d'autres personnes",fb:"Tu as essayé ? Ajoute ton retour",fbp:"Ce qui s'est passé pour toi",fbb:"Ajouter mon retour",sg:"Recherche en cours…",sc:"Structuration en cours…",sho:"Écris au moins une ou deux phrases, ou réponds aux questions guidées.",ok:"Voici les fiches les plus proches de ta question. Lis les étapes et les erreurs à éviter, puis ajoute ton retour.",no:"Aucune fiche ne correspond encore. Tu peux être le premier à partager ce que tu sais.",dn:"Mode démonstration : ici, la recherche et la création de fiches utilisent des règles simples, sans correction automatique. Les fonctions d'IA sont montrées dans la vidéo de démonstration.",sit:"Situation : ",did:"Ce que j'ai fait : ",wk:"Ce qui a marché : ",er2:"Erreur à éviter : ",rs2:"Ressource : ",gen:"Général",nw:"Nouvelle fiche",ln:"français"},
+en:{sub:"People's experience becomes knowledge that others can find, apply and enrich. Prototype for anyone with know-how to pass on: cook, cobbler, tailor, student…",ts:"Search",th:"Share",tf:"All cards",ql:"What is your question?",qp:"E.g. How can I make my shoes last longer?",ll:"Your situation",lv:["Beginner","1st-year student","2nd-year student","3rd-year student","Master's student"],go:"Find an experience",sh:"Share what you know",sn:"A skill from your trade, a tip, a link, a mistake to avoid: anything that can help someone counts.",mn:" Add new knowledge",ma:" Complete an existing card",tl:"Which card do you want to complete?",fl:"What you want to share",fp:"Write as if you were talking to a friend. No need to write well.",gb:"I don't know where to start",gh:"Hide the guided questions",g:["What situation were you in?","What did you do?","What worked well?","What mistake should be avoided?","What link or resource can help?"],mk:"Turn into a card",st:"Steps",tp:"Advice",er:"Mistakes to avoid",rs:"Resources",rt:"Feedback from others",fb:"Did you try it? Add your feedback",fbp:"What happened for you",fbb:"Add my feedback",sg:"Searching…",sc:"Building the card…",sho:"Write at least a sentence or two, or answer the guided questions.",ok:"Here are the cards closest to your question. Read the steps and the mistakes to avoid, then add your feedback.",no:"No card matches yet. You can be the first to share what you know.",dn:"Demo mode: here, search and card creation use simple rules, with no automatic spelling correction. The AI features are shown in the demo video.",sit:"Situation: ",did:"What I did: ",wk:"What worked: ",er2:"Mistake to avoid: ",rs2:"Resource: ",gen:"General",nw:"New card",ln:"English"}};
+const S={fr:[
+{id:"f1",titre:"Se préparer à l'examen d'un professeur avec les sujets précédents",domaine:"Examens",contexte:"Un étudiant de 3e année a passé les examens de ce professeur sur deux ans.",etapes:["Récupérer les sujets des deux dernières années","Repérer les chapitres qui reviennent","Refaire chaque sujet en temps limité","Comparer avec un corrigé ou un camarade"],conseils:["Ce professeur pose des questions d'application plutôt que de cours pur","Les exercices reviennent avec des données modifiées"],erreurs:["Apprendre le cours sans pratiquer les sujets types"],ressources:["Demander les sujets aux étudiants de l'année supérieure"],retours:[]},
+{id:"f2",titre:"Trouver et réussir une candidature (programme, bourse, concours)",domaine:"Candidatures",contexte:"Un étudiant plus avancé a partagé des liens officiels pour postuler à des programmes.",etapes:["Lister les opportunités ouvertes avec leur date limite","Lire les conditions et les documents demandés","Préparer le CV et les textes à l'avance","Faire relire par une personne expérimentée","Soumettre avant le dernier jour"],conseils:["Garder les liens officiels dans un seul document","Adapter chaque candidature au programme visé"],erreurs:["Attendre le dernier jour pour soumettre","Envoyer le même CV partout"],ressources:["Liens officiels de candidature donnés par un étudiant plus avancé"],retours:[]},
+{id:"f3",titre:"Trouver la bonne personne à qui demander de l'aide",domaine:"Entraide",contexte:"Un étudiant sait qu'il lui manque une information mais ne sait pas qui la détient.",etapes:["Formuler la question précisément","Demander d'abord aux étudiants de l'année supérieure dans la même filière","Contacter l'enseignant ou l'association concernée","Noter la réponse pour la partager"],conseils:["Une question précise obtient une réponse plus rapide"],erreurs:["Poser une question vague dans un grand groupe"],ressources:[],retours:[]},
+{id:"f4",titre:"Faire durer un vêtement : l'entretien selon le tailleur",domaine:"Couture",contexte:"Exemple de démonstration : le savoir d'un tailleur sur l'entretien des vêtements.",etapes:["Lire l'étiquette avant le premier lavage","Laver les couleurs foncées à l'envers","Repasser à la température adaptée au tissu","Recoudre un bouton ou une couture dès qu'ils lâchent"],conseils:["Un petit défaut réparé tôt évite une grosse réparation","Ne pas trop charger la machine ou la bassine"],erreurs:["Faire sécher les couleurs vives en plein soleil","Laisser une tache sécher avant de la traiter"],ressources:[],retours:[]},
+{id:"f5",titre:"Bien cuire les haricots",domaine:"Cuisine",contexte:"Exemple de démonstration : le savoir d'une cuisinière sur la cuisson des haricots.",etapes:["Les faire tremper la veille","Jeter l'eau de trempage","Cuire à feu doux jusqu'à ce qu'ils soient tendres","Ajouter la tomate et les ingrédients acides en fin de cuisson"],conseils:["Un feu doux donne une cuisson régulière"],erreurs:["Ajouter l'acide trop tôt : les haricots restent durs"],ressources:[],retours:[]},
+{id:"f6",titre:"Prolonger la vie de ses chaussures",domaine:"Cordonnerie",contexte:"Exemple de démonstration : le savoir d'un cordonnier sur l'entretien des chaussures.",etapes:["Nettoyer et sécher les chaussures à l'ombre","Nourrir ou cirer le cuir régulièrement","Faire refaire la semelle avant qu'elle soit percée","Alterner deux paires dans la semaine"],conseils:["Une semelle changée à temps coûte moins cher qu'une paire neuve"],erreurs:["Sécher des chaussures mouillées près du feu : le cuir se fend"],ressources:[],retours:[]}],
+en:[
+{id:"f1",titre:"Prepare for a professor's exam using past papers",domaine:"Exams",contexte:"A third-year student who sat this professor's exams over two years.",etapes:["Get the papers from the last two years","Spot the chapters that keep coming back","Redo each paper under timed conditions","Compare with a model answer or a classmate"],conseils:["This professor asks application questions rather than pure course recall","The same exercises come back with different numbers"],erreurs:["Studying the course without practising past papers"],ressources:["Ask students in the year above for the papers"],retours:[]},
+{id:"f2",titre:"Find and succeed in an application (programme, scholarship, competition)",domaine:"Applications",contexte:"A more advanced student shared official links for applying to programmes.",etapes:["List open opportunities with their deadlines","Read the conditions and required documents","Prepare your CV and texts early","Ask an experienced person to review them","Submit before the last day"],conseils:["Keep the official links in a single document","Adapt each application to the programme"],erreurs:["Waiting until the last day to submit","Sending the same CV everywhere"],ressources:["Official application links shared by a more advanced student"],retours:[]},
+{id:"f3",titre:"Find the right person to ask for help",domaine:"Mutual help",contexte:"A student knows something is missing but not who has the answer.",etapes:["Phrase the question precisely","Ask students in the year above in the same field first","Contact the teacher or the relevant association","Write down the answer so you can share it"],conseils:["A precise question gets a faster answer"],erreurs:["Asking a vague question in a big group"],ressources:[],retours:[]},
+{id:"f4",titre:"Make a garment last: care tips from a tailor",domaine:"Tailoring",contexte:"Demo example: a tailor's knowledge about garment care.",etapes:["Read the label before the first wash","Wash dark colours inside out","Iron at the right temperature for the fabric","Re-sew a button or seam as soon as it comes loose"],conseils:["A small flaw fixed early avoids a big repair","Don't overload the machine or the basin"],erreurs:["Drying bright colours in direct sun","Letting a stain dry before treating it"],ressources:[],retours:[]},
+{id:"f5",titre:"Cook beans properly",domaine:"Cooking",contexte:"Demo example: a cook's knowledge about cooking beans.",etapes:["Soak them the night before","Throw away the soaking water","Cook on low heat until tender","Add tomato and acidic ingredients at the end"],conseils:["Low heat gives an even cooking"],erreurs:["Adding acid too early: the beans stay hard"],ressources:[],retours:[]},
+{id:"f6",titre:"Make your shoes last longer",domaine:"Shoemaking",contexte:"Demo example: a cobbler's knowledge about shoe care.",etapes:["Clean shoes and dry them in the shade","Feed or polish the leather regularly","Have the sole redone before it wears through","Alternate two pairs during the week"],conseils:["A sole replaced in time costs less than a new pair"],erreurs:["Drying wet shoes near a fire: the leather cracks"],ressources:[],retours:[]}]};
+let LANG=(navigator.language||"").startsWith("fr")?"fr":"en";try{LANG=localStorage.getItem("kf_lang")||LANG}catch(e){}
+let F=[],cur="search",sample=null;
+const T=()=>L[LANG];
+function load(){let a=null;try{a=JSON.parse(localStorage.getItem("kf3_"+LANG)||"null")}catch(e){}return Array.isArray(a)&&a.length?a:JSON.parse(JSON.stringify(S[LANG]))}
+const save=()=>{try{localStorage.setItem("kf3_"+LANG,JSON.stringify(F))}catch(e){}};
+(async()=>{try{if(window.claude&&claude.use){sample=await claude.use("sample")}}catch(e){}setNote()})();
+function setNote(){$("#mode-note").textContent=sample?"":T().dn}
+const arr=a=>Array.isArray(a)?a.map(String).filter(Boolean):[];
+function h(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
+function block(card,title,items,ord,cls){if(!items.length)return;const d=h("div",cls||"");d.append(h("h4","",title));const l=h(ord?"ol":"ul");items.forEach(i=>l.append(h("li","",i)));d.append(l);card.append(d)}
+function fiche(f){const t=T(),c=h("article","card");c.append(h("span","tag",f.domaine||t.gen),h("h3","",f.titre),h("p","ctx",f.contexte||""));
+block(c,t.st,arr(f.etapes),true);block(c,t.tp,arr(f.conseils));block(c,t.er,arr(f.erreurs),false,"err");block(c,t.rs,arr(f.ressources));block(c,t.rt,arr(f.retours));
+const fb=h("div","fb");fb.append(h("h4","",t.fb));const r=h("div","row");const i=h("input");i.type="text";i.placeholder=t.fbp;i.setAttribute("aria-label",t.fbp);
+const b=h("button","btn",t.fbb);b.onclick=()=>{const v=i.value.trim();if(!v)return;f.retours=arr(f.retours).concat(v);save();c.replaceWith(fiche(f))};r.append(i,b);fb.append(r);c.append(fb);return c}
+function show(n){cur=n;["search","share","fiches"].forEach(k=>{$("#p-"+k).hidden=k!==n;$("#t-"+k).setAttribute("aria-selected",k===n)});if(n==="fiches")listAll();if(n==="share")fillTargets()}
+["search","share","fiches"].forEach(n=>$("#t-"+n).onclick=()=>show(n));
+function listAll(){const a=$("#all");a.replaceChildren();F.forEach(f=>a.append(fiche(f)))}
+function fillTargets(){const s=$("#target");s.replaceChildren();F.forEach(f=>{const o=h("option","",f.titre);o.value=f.id;s.append(o)})}
+document.querySelectorAll("input[name=m]").forEach(r=>r.onchange=()=>{$("#tbox").hidden=document.querySelector("input[name=m]:checked").value!=="add"});
+const gbTxt=()=>$("#guide").hidden?T().gb:T().gh;
+$("#guide-btn").onclick=()=>{$("#guide").hidden=!$("#guide").hidden;$("#guide-btn").textContent=gbTxt()};
+function applyLang(){const t=T();document.documentElement.lang=LANG;$("#sub").textContent=t.sub;$("#t-search").textContent=t.ts;$("#t-share").textContent=t.th;$("#t-fiches").textContent=t.tf;
+$("#ql").textContent=t.ql;$("#q").placeholder=t.qp;$("#ll").textContent=t.ll;const s=$("#lvl");s.replaceChildren();t.lv.forEach((x,i)=>{const o=h("option","",x);if(i===3)o.selected=true;s.append(o)});
+$("#go").textContent=t.go;$("#sh").textContent=t.sh;$("#sn").textContent=t.sn;$("#mn").textContent=t.mn;$("#ma").textContent=t.ma;$("#tl").textContent=t.tl;$("#fl").textContent=t.fl;$("#free").placeholder=t.fp;
+$("#guide-btn").textContent=gbTxt();t.g.forEach((x,i)=>$("#gl"+(i+1)).textContent=x);$("#make").textContent=t.mk;
+$("#lfr").setAttribute("aria-pressed",LANG==="fr");$("#len").setAttribute("aria-pressed",LANG==="en");setNote()}
+function setLang(l){LANG=l;try{localStorage.setItem("kf_lang",l)}catch(e){}F=load();applyLang();$("#sres").replaceChildren();$("#mres").textContent="";show(cur)}
+$("#lfr").onclick=()=>setLang("fr");$("#len").onclick=()=>setLang("en");
+const STOP=["comment","faire","pour","dans","avec","quel","quelle","quels","mes","mon","ton","tes","cette","cela","être","avoir","how","what","can","the","with","from","that","this","for","and","your","make","does","should","would"];
+
+$("#go").onclick=async()=>{const t=T(),q=$("#q").value.trim();if(!q)return;const out=$("#sres");out.replaceChildren(h("p","empty",t.sg));$("#go").disabled=true;
+let ids=[],rep="";
+if(sample){try{const r=await sample.json(`You are the assistant of KnowFlow, a platform where people share practical know-how. Cards (JSON): ${JSON.stringify(F.map(f=>({id:f.id,titre:f.titre,contexte:f.contexte,etapes:f.etapes,conseils:f.conseils,erreurs:f.erreurs,retours:f.retours})))}\nUser question: "${q}". User profile: ${$("#lvl").value}.\nPick at most 2 relevant cards and write, in ${t.ln}, a 4 to 6 sentence answer adapted to the user's profile that explains how to apply these experiences. If no card fits, say so honestly. Reply only with JSON: {"ids":["..."],"reponse":"..."}`);ids=arr(r.ids);rep=String(r.reponse||"")}catch(e){}}
+if(!rep){const w=q.toLowerCase().split(/[^a-zà-ÿ0-9]+/).filter(x=>x.length>3&&!STOP.includes(x));const sc=F.map(f=>[f,w.filter(x=>JSON.stringify(f).toLowerCase().includes(x)).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]);ids=sc.slice(0,2).map(a=>a[0].id);rep=ids.length?t.ok:t.no}
+out.replaceChildren(h("div","answer",rep));F.filter(f=>ids.includes(f.id)).forEach(f=>out.append(fiche(f)));$("#go").disabled=false};
+
+$("#make").onclick=async()=>{const t=T(),g=["g1","g2","g3","g4","g5"].map(i=>$("#"+i).value.trim());const free=$("#free").value.trim();
+const txt=[free,g[0]&&t.sit+g[0],g[1]&&t.did+g[1],g[2]&&t.wk+g[2],g[3]&&t.er2+g[3],g[4]&&t.rs2+g[4]].filter(Boolean).join("\n");
+const m=$("#mres");if(txt.length<20){m.textContent=t.sho;return}
+m.textContent=t.sc;$("#make").disabled=true;const mode=document.querySelector("input[name=m]:checked").value;
+const rules=`Write in ${t.ln}. Correct spelling and grammar mistakes, keep the person's meaning, and do not invent facts.`;
+const fmt='{"titre":"","domaine":"","contexte":"","etapes":[],"conseils":[],"erreurs":[],"ressources":[]}';
+if(mode==="new"){let d=null;
+if(sample){try{d=await sample.json(`You are KnowFlow's assistant. Turn this testimony into a clear knowledge card. ${rules}\nTestimony:\n${txt}\nReply only with JSON: ${fmt}`)}catch(e){}}
+if(!d)d={titre:(free||g[0]||txt).slice(0,70),domaine:t.gen,contexte:g[0]||free,etapes:g[1]?[g[1]]:[],conseils:g[2]?[g[2]]:(free?[free]:[]),erreurs:g[3]?[g[3]]:[],ressources:g[4]?[g[4]]:[]};
+F.unshift({id:"u"+Date.now(),titre:String(d.titre||t.nw),domaine:String(d.domaine||t.gen),contexte:String(d.contexte||""),etapes:arr(d.etapes),conseils:arr(d.conseils),erreurs:arr(d.erreurs),ressources:arr(d.ressources),retours:[]})}
+else{const f=F.find(x=>x.id===$("#target").value);let d=null;
+if(sample){try{d=await sample.json(`Existing card: ${JSON.stringify(f)}\nNew contribution:\n${txt}\nExtract only what is NEW compared with the card, without repeating it. ${rules}\nReply only with JSON: {"etapes":[],"conseils":[],"erreurs":[],"ressources":[]}`)}catch(e){}}
+if(!d)d={conseils:[free||txt],erreurs:g[3]?[g[3]]:[],ressources:g[4]?[g[4]]:[]};
+["etapes","conseils","erreurs","ressources"].forEach(k=>f[k]=arr(f[k]).concat(arr(d[k])))}
+save();$("#make").disabled=false;m.textContent="";$("#free").value="";["g1","g2","g3","g4","g5"].forEach(i=>$("#"+i).value="");show("fiches")};
+F=load();applyLang();
+</script></body></html>
