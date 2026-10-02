@@ -81,12 +81,11 @@ en:[
 {id:"f5",titre:"Cook beans properly",domaine:"Cooking",contexte:"Demo example: a cook's knowledge about cooking beans.",etapes:["Soak them the night before","Throw away the soaking water","Cook on low heat until tender","Add tomato and acidic ingredients at the end"],conseils:["Low heat gives an even cooking"],erreurs:["Adding acid too early: the beans stay hard"],ressources:[],retours:[]},
 {id:"f6",titre:"Make your shoes last longer",domaine:"Shoemaking",contexte:"Demo example: a cobbler's knowledge about shoe care.",etapes:["Clean shoes and dry them in the shade","Feed or polish the leather regularly","Have the sole redone before it wears through","Alternate two pairs during the week"],conseils:["A sole replaced in time costs less than a new pair"],erreurs:["Drying wet shoes near a fire: the leather cracks"],ressources:[],retours:[]}]};
 let LANG=(navigator.language||"").startsWith("fr")?"fr":"en";try{LANG=localStorage.getItem("kf_lang")||LANG}catch(e){}
-let F=[],cur="search",sample=null;
+let F=[],cur="search";
 const T=()=>L[LANG];
 function load(){let a=null;try{a=JSON.parse(localStorage.getItem("kf3_"+LANG)||"null")}catch(e){}return Array.isArray(a)&&a.length?a:JSON.parse(JSON.stringify(S[LANG]))}
 const save=()=>{try{localStorage.setItem("kf3_"+LANG,JSON.stringify(F))}catch(e){}};
-(async()=>{try{if(window.claude&&claude.use){sample=await claude.use("sample")}}catch(e){}setNote()})();
-function setNote(){$("#mode-note").textContent=sample?"":T().dn}
+function setNote(){$("#mode-note").textContent=T().dn}
 const arr=a=>Array.isArray(a)?a.map(String).filter(Boolean):[];
 function h(tag,cls,txt){const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e}
 function block(card,title,items,ord,cls){if(!items.length)return;const d=h("div",cls||"");d.append(h("h4","",title));const l=h(ord?"ol":"ul");items.forEach(i=>l.append(h("li","",i)));d.append(l);card.append(d)}
@@ -110,26 +109,22 @@ function setLang(l){LANG=l;try{localStorage.setItem("kf_lang",l)}catch(e){}F=loa
 $("#lfr").onclick=()=>setLang("fr");$("#len").onclick=()=>setLang("en");
 const STOP=["comment","faire","pour","dans","avec","quel","quelle","quels","mes","mon","ton","tes","cette","cela","être","avoir","how","what","can","the","with","from","that","this","for","and","your","make","does","should","would"];
 
-$("#go").onclick=async()=>{const t=T(),q=$("#q").value.trim();if(!q)return;const out=$("#sres");out.replaceChildren(h("p","empty",t.sg));$("#go").disabled=true;
-let ids=[],rep="";
-if(sample){try{const r=await sample.json(`You are the assistant of KnowFlow, a platform where people share practical know-how. Cards (JSON): ${JSON.stringify(F.map(f=>({id:f.id,titre:f.titre,contexte:f.contexte,etapes:f.etapes,conseils:f.conseils,erreurs:f.erreurs,retours:f.retours})))}\nUser question: "${q}". User profile: ${$("#lvl").value}.\nPick at most 2 relevant cards and write, in ${t.ln}, a 4 to 6 sentence answer adapted to the user's profile that explains how to apply these experiences. If no card fits, say so honestly. Reply only with JSON: {"ids":["..."],"reponse":"..."}`);ids=arr(r.ids);rep=String(r.reponse||"")}catch(e){}}
-if(!rep){const w=q.toLowerCase().split(/[^a-zà-ÿ0-9]+/).filter(x=>x.length>3&&!STOP.includes(x));const sc=F.map(f=>[f,w.filter(x=>JSON.stringify(f).toLowerCase().includes(x)).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]);ids=sc.slice(0,2).map(a=>a[0].id);rep=ids.length?t.ok:t.no}
-out.replaceChildren(h("div","answer",rep));F.filter(f=>ids.includes(f.id)).forEach(f=>out.append(fiche(f)));$("#go").disabled=false};
+$("#go").onclick=()=>{const t=T(),q=$("#q").value.trim();if(!q)return;const out=$("#sres");
+const w=q.toLowerCase().split(/[^a-zà-ÿ0-9]+/).filter(x=>x.length>3&&!STOP.includes(x));
+const sc=F.map(f=>[f,w.filter(x=>JSON.stringify(f).toLowerCase().includes(x)).length]).filter(a=>a[1]).sort((a,b)=>b[1]-a[1]);
+const ids=sc.slice(0,2).map(a=>a[0].id);const rep=ids.length?t.ok:t.no;
+out.replaceChildren(h("div","answer",rep));F.filter(f=>ids.includes(f.id)).forEach(f=>out.append(fiche(f)))};
 
-$("#make").onclick=async()=>{const t=T(),g=["g1","g2","g3","g4","g5"].map(i=>$("#"+i).value.trim());const free=$("#free").value.trim();
+$("#make").onclick=()=>{const t=T(),g=["g1","g2","g3","g4","g5"].map(i=>$("#"+i).value.trim());const free=$("#free").value.trim();
 const txt=[free,g[0]&&t.sit+g[0],g[1]&&t.did+g[1],g[2]&&t.wk+g[2],g[3]&&t.er2+g[3],g[4]&&t.rs2+g[4]].filter(Boolean).join("\n");
 const m=$("#mres");if(txt.length<20){m.textContent=t.sho;return}
-m.textContent=t.sc;$("#make").disabled=true;const mode=document.querySelector("input[name=m]:checked").value;
-const rules=`Write in ${t.ln}. Correct spelling and grammar mistakes, keep the person's meaning, and do not invent facts.`;
-const fmt='{"titre":"","domaine":"","contexte":"","etapes":[],"conseils":[],"erreurs":[],"ressources":[]}';
-if(mode==="new"){let d=null;
-if(sample){try{d=await sample.json(`You are KnowFlow's assistant. Turn this testimony into a clear knowledge card. ${rules}\nTestimony:\n${txt}\nReply only with JSON: ${fmt}`)}catch(e){}}
-if(!d)d={titre:(free||g[0]||txt).slice(0,70),domaine:t.gen,contexte:g[0]||free,etapes:g[1]?[g[1]]:[],conseils:g[2]?[g[2]]:(free?[free]:[]),erreurs:g[3]?[g[3]]:[],ressources:g[4]?[g[4]]:[]};
+const mode=document.querySelector("input[name=m]:checked").value;
+if(mode==="new"){
+const d={titre:(free||g[0]||txt).slice(0,70),domaine:t.gen,contexte:g[0]||free,etapes:g[1]?[g[1]]:[],conseils:g[2]?[g[2]]:(free?[free]:[]),erreurs:g[3]?[g[3]]:[],ressources:g[4]?[g[4]]:[]};
 F.unshift({id:"u"+Date.now(),titre:String(d.titre||t.nw),domaine:String(d.domaine||t.gen),contexte:String(d.contexte||""),etapes:arr(d.etapes),conseils:arr(d.conseils),erreurs:arr(d.erreurs),ressources:arr(d.ressources),retours:[]})}
-else{const f=F.find(x=>x.id===$("#target").value);let d=null;
-if(sample){try{d=await sample.json(`Existing card: ${JSON.stringify(f)}\nNew contribution:\n${txt}\nExtract only what is NEW compared with the card, without repeating it. ${rules}\nReply only with JSON: {"etapes":[],"conseils":[],"erreurs":[],"ressources":[]}`)}catch(e){}}
-if(!d)d={conseils:[free||txt],erreurs:g[3]?[g[3]]:[],ressources:g[4]?[g[4]]:[]};
+else{const f=F.find(x=>x.id===$("#target").value);
+const d={conseils:[free||txt],erreurs:g[3]?[g[3]]:[],ressources:g[4]?[g[4]]:[]};
 ["etapes","conseils","erreurs","ressources"].forEach(k=>f[k]=arr(f[k]).concat(arr(d[k])))}
-save();$("#make").disabled=false;m.textContent="";$("#free").value="";["g1","g2","g3","g4","g5"].forEach(i=>$("#"+i).value="");show("fiches")};
+save();m.textContent="";$("#free").value="";["g1","g2","g3","g4","g5"].forEach(i=>$("#"+i).value="");show("fiches")};
 F=load();applyLang();
 </script></body></html>
